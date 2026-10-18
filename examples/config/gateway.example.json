@@ -1,0 +1,47 @@
+{
+  "gateway": {
+    "port": 8080,
+    "bind": "127.0.0.1",
+    "auth": { "mode": "token", "tokenSecretRef": "secret:GATEWAY_TOKEN" }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "./workspace",
+      "model": { "primary": "provider-a/small-model", "fallbacks": ["provider-b/small-model"] },
+      "heartbeat": { "enabled": false }
+    },
+    "list": [
+      {
+        "id": "main",
+        "role": "coordinator",
+        "model": { "primary": "provider-a/medium-model", "escalation": "provider-a/large-model" },
+        "tools": { "allow": ["sessions.spawn", "message.send"], "requireApproval": ["message.send"] }
+      },
+      {
+        "id": "ops",
+        "role": "infrastructure",
+        "tools": { "allow": ["container.read", "backup.run"], "requireApproval": ["container.write"] }
+      },
+      {
+        "id": "career",
+        "role": "job-search helper",
+        "tools": { "allow": ["files.read", "files.write"], "requireApproval": [] }
+      }
+    ]
+  },
+  "bindings": [
+    { "agent": "ops", "channel": "chat", "room": "room-ops-placeholder" },
+    { "agent": "career", "channel": "chat", "room": "room-career-placeholder" }
+  ],
+  "channels": {
+    "chat": {
+      "enabled": true,
+      "tokenSecretRef": "secret:CHAT_BOT_TOKEN",
+      "dmPolicy": "allowlist",
+      "allowFrom": ["user-id-placeholder"]
+    }
+  },
+  "session": { "reset": { "mode": "daily", "atHour": 4 }, "maintenance": { "pruneAfter": "30d", "maxEntries": 500 } },
+  "messages": { "queue": { "mode": "debounce", "debounceMs": 1500, "cap": 20, "drop": "oldest" } },
+  "cron": { "enabled": true, "maxConcurrentRuns": 2, "sessionRetention": "7d" }
+}

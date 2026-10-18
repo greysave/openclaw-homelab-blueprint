@@ -1,0 +1,28 @@
+# Generic example. Replace placeholders; supply secrets via an env file or secret manager (not this file).
+services:
+  gateway:
+    image: example.invalid/gateway@sha256:REPLACE_WITH_DIGEST   # pin by digest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"          # loopback only; expose via authenticated reverse proxy
+    env_file:
+      - ./gateway.env                  # git-ignored; holds secret values
+    volumes:
+      - ./config/gateway.json:/config/gateway.json:ro
+      - gateway-state:/state           # sessions/memory: private, never committed
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    networks: [internal]
+
+  mcp-example:
+    image: example.invalid/mcp-server@sha256:REPLACE_WITH_DIGEST
+    restart: unless-stopped
+    env_file: [./mcp.env]
+    networks: [internal]               # no published ports
+
+volumes:
+  gateway-state:
+networks:
+  internal:
+    internal: true

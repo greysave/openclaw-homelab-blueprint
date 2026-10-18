@@ -1,0 +1,30 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pyyaml jsonschema
+      - name: Validate JSON, YAML and schema
+        run: |
+          python - <<'PY'
+          import glob, json, yaml
+          from jsonschema import Draft202012Validator, validate
+          for f in glob.glob("**/*.json", recursive=True):
+              json.load(open(f))
+          for f in glob.glob("**/*.y*ml", recursive=True):
+              if not f.startswith(".github/"):
+                  yaml.safe_load(open(f))
+          schema = json.load(open("schema/gateway-config.schema.json"))
+          Draft202012Validator.check_schema(schema)
+          validate(json.load(open("examples/config/gateway.example.json")), schema)
+          print("ok")
+          PY

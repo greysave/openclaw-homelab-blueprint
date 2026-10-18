@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Illustrative gateway config shape (blueprint, not an official schema)",
+  "type": "object",
+  "required": ["gateway", "agents"],
+  "properties": {
+    "gateway": {
+      "type": "object",
+      "required": ["port", "bind", "auth"],
+      "properties": {
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "bind": { "type": "string" },
+        "auth": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": { "enum": ["token", "password", "none"] },
+            "tokenSecretRef": { "type": "string", "pattern": "^secret:[A-Z0-9_]+$" }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "required": ["list"],
+      "properties": {
+        "defaults": { "type": "object" },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "role"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+              "role": { "type": "string" },
+              "model": { "type": "object" },
+              "tools": {
+                "type": "object",
+                "properties": {
+                  "allow": { "type": "array", "items": { "type": "string" } },
+                  "requireApproval": { "type": "array", "items": { "type": "string" } }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "bindings": { "type": "array", "items": { "type": "object", "required": ["agent", "channel"] } },
+    "channels": { "type": "object" },
+    "session": { "type": "object" },
+    "messages": { "type": "object" },
+    "cron": { "type": "object" }
+  }
+}

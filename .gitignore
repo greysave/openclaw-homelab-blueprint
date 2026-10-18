@@ -1,0 +1,17 @@
+.env
+.env.*
+*.env
+!*.env.example
+*.bak*
+*.log
+logs/
+sessions/
+memory/
+secrets/
+state/
+*.sqlite
+*.db
+*.pem
+*.key
+node_modules/
+gateway.json
